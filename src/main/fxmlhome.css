@@ -1,0 +1,22 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+
+}
+
+.tool-bar{
+    -fx-background-color: #2196f3;
+}
+
+.bg-white-smoke{
+    -fx-background-color: #f5f5f5;
+}
+
+.btn-float-primary{
+    -fx-background-color: #2196f3;
+    -fx-font-size: 30px;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+}

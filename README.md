@@ -25,3 +25,12 @@ Usuários que tenham distâncias compatíveis.
 
 ## Getting started
 Projeto construido utilizando JavaFX no Netbeans. Necessário compilar para gerar dist
+
+### Login
+
+![alt img](img/login.png)
+
+
+### Home
+
+![alt img](img/home.png)
