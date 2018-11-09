@@ -8,6 +8,7 @@ package main;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
+import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -43,7 +44,7 @@ import javafx.stage.Stage;
  *
  * @author Nonato Dias
  */
-public class FXMLHomeDocumentController implements Initializable {
+public class FXMLLoginDocumentController implements Initializable {
     
     @FXML
     private JFXButton btnLogin;
@@ -55,10 +56,10 @@ public class FXMLHomeDocumentController implements Initializable {
     private JFXTextField textFieldLogin;
 
     @FXML
-    private JFXTextField textFieldPass;
+    private JFXButton btnSignIn;
 
     @FXML
-    private JFXButton btnSignIn;
+    private JFXPasswordField textFieldPass;
 
     /**
      * Initializes the controller class.
