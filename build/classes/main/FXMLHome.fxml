@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXSpinner?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToolbar?>
 <?import com.jfoenix.controls.JFXTreeTableView?>
@@ -11,13 +12,23 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="645.0" prefWidth="833.0" style="-fx-background-color: white;" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="main.FXMLHomeController">
+<AnchorPane id="AnchorPane" prefHeight="645.0" prefWidth="833.0" style="-fx-background-color: white;" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLHomeController">
     <stylesheets>
         <URL value="@fxmlhome.css" />
     </stylesheets>
    <children>
+      <StackPane fx:id="loadingPane" layoutX="-6.0" prefHeight="647.0" prefWidth="926.0">
+         <children>
+            <Pane opacity="0.4" prefHeight="654.0" prefWidth="934.0" style="-fx-background-color: white;">
+               <children>
+                  <JFXSpinner layoutX="404.0" layoutY="267.0" prefHeight="104.0" prefWidth="103.0" />
+               </children>
+            </Pane>
+         </children>
+      </StackPane>
       <JFXToolbar prefHeight="62.0" prefWidth="916.0" styleClass="tool-bar">
          <left>
             <Label alignment="CENTER" prefHeight="41.0" prefWidth="263.0" text="SIM - Home" textAlignment="CENTER" textFill="WHITE" BorderPane.alignment="CENTER">

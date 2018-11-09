@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -37,7 +38,10 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-
+import main.tuplas.UserEntry;
+import net.jini.space.JavaSpace;
+import main.util.Lookup;
+import net.jini.core.transaction.TransactionException;
 
 /**
  * FXML Controller class
@@ -45,6 +49,9 @@ import javafx.stage.Stage;
  * @author Nonato Dias
  */
 public class FXMLLoginDocumentController implements Initializable {
+    
+    @FXML
+    private StackPane loadingPane;
     
     @FXML
     private JFXButton btnLogin;
@@ -61,12 +68,64 @@ public class FXMLLoginDocumentController implements Initializable {
     @FXML
     private JFXPasswordField textFieldPass;
 
+    JavaSpace javaSpace;
+    
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        btnLogin.setOnAction((e)->{
+            openHome();
+        });
         
+        loadingPane.toFront();
+        loading(true);
+        
+        System.out.println("Procurando pelo servico JavaSpace...");
+        /*Platform.runLater(()->{
+            
+        });*/
+        new Thread(()->{
+            Lookup finder = new Lookup(JavaSpace.class);
+            this.javaSpace = (JavaSpace) finder.getService();
+            if (this.javaSpace == null) {
+                System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+            } 
+            System.out.println("O servico JavaSpace foi encontrado.");
+
+            UserEntry user = new UserEntry();
+            user.setAttributes("admin", "admin");
+
+            try {
+                this.javaSpace.write(user, null, Long.MAX_VALUE);
+                System.out.println("User "+ user.login +" adicionado");
+                
+                loading(false);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+        }).start();
     }    
+    
+    public void openHome(){
+        Parent home = null;
+        try {
+            home = FXMLLoader.load(getClass().getResource("FXMLHome.fxml"));
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Scene scene = new Scene(home);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+    
+    private void loading(Boolean flag){
+        loadingPane.setVisible(flag);
+    }
     
 }
