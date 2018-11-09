@@ -28,9 +28,9 @@ Projeto construido utilizando JavaFX no Netbeans. Necessário compilar para gera
 
 ### Login
 
-![alt img](img/login.png)
+![alt img](https://raw.githubusercontent.com/NonatoDias/SIM-espaco-tuplas-/master/img/login.PNG)
 
 
 ### Home
 
-![alt img](img/home.png)
+![alt img](https://raw.githubusercontent.com/NonatoDias/SIM-espaco-tuplas-/master/img/home.PNG)
