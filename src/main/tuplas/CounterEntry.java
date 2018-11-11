@@ -5,19 +5,23 @@
  */
 package main.tuplas;
 
+import net.jini.core.entry.Entry;
+
 /**
  *
  * @author Nonato Dias
  */
-public class CounterEntry {
+public class CounterEntry implements Entry{
     public Integer lastIdUser;
     public Integer lastIdRoom;
     
     public CounterEntry(){};
     
-    public void increaseUser(){
+    public Integer increaseUser(){
         if(lastIdUser != null){
-            lastIdUser++;
+            lastIdUser = lastIdUser + 1;
+            return lastIdUser;
         }
+        return null;
     }
 }

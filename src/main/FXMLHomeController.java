@@ -34,6 +34,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import main.tuplas.CounterEntry;
 import main.tuplas.UserEntry;
 import main.tuplas.UserRoomEntry;
 import main.util.Lookup;
@@ -91,10 +92,8 @@ public class FXMLHomeController implements Initializable {
             getUserInRadar();
         });
         
-        setUserConfigs("admin", "0", "0");
-        initAndAddUserEntry(()->{
-            
-        });
+        //setUserConfigs("admin", "0", "0");
+        init(null);
     }    
     
     /**
@@ -102,7 +101,7 @@ public class FXMLHomeController implements Initializable {
      * Adiciona o usuário q efetuou login
      * @param callback 
      */
-    public void initAndAddUserEntry(Runnable callback){
+    public void init(Runnable callback){
         System.out.println("Procurando pelo servico JavaSpace...");
         loading(true);
         
@@ -113,14 +112,14 @@ public class FXMLHomeController implements Initializable {
                 System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
             } 
             System.out.println("O servico JavaSpace foi encontrado.");
-            try {
+            /*try {
                 this.javaSpace.write(user, null, Lease.FOREVER);
                 System.out.println("User "+ user.login +" adicionado");
                 loading(false);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-            
+            }*/
+            loading(false);
             if(callback != null){
                 callback.run();
             }
@@ -307,18 +306,18 @@ public class FXMLHomeController implements Initializable {
         loading(true);
         Thread t = new Thread(()->{
             try {
-                boolean flag = true;
                 int count = 0;
+                CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 60 * 1000);
                 UserEntry template = new UserEntry();
-                while(flag){
-                    UserEntry user = (UserEntry) this.javaSpace.take(template, null, 60 * 1000);
+                while(count <= counter.lastIdUser){
+                    template.id = count;
+                    UserEntry user = (UserEntry) this.javaSpace.read(template, null, 3 * 1000);
                     if (user == null) {
                         System.out.println("Tempo de espera esgotado. Encerrando...");
-                        flag = false;
                     }else {
-                        count++;
-                        System.out.println(count + " - Lendo ... "+ user.login);
+                        System.out.println(" - Lendo ... "+ user.id + " - "+ user.login);
                     }
+                    count++;
                 }
                 loading(false);
             } catch (Exception e) {

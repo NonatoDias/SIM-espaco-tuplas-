@@ -38,9 +38,11 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import main.tuplas.CounterEntry;
 import main.tuplas.UserEntry;
 import net.jini.space.JavaSpace;
 import main.util.Lookup;
+import net.jini.core.lease.Lease;
 import net.jini.core.transaction.TransactionException;
 
 /**
@@ -74,8 +76,11 @@ public class FXMLLoginDocumentController implements Initializable {
     @FXML
     private JFXTextField textFieldLng;
 
+    JavaSpace javaSpace;
     Dialog alert;
     UserStorage userStorage = new UserStorage();
+    CounterEntry counter = null;
+    UserEntry user = new UserEntry();
     
     /**
      * Initializes the controller class.
@@ -102,8 +107,11 @@ public class FXMLLoginDocumentController implements Initializable {
     
     public void login(String login, String pass){
         if(userStorage.hasUser(login, pass)){
-            openHome(login);
-            clearFields();
+            user.setAttributes(null, login, Float.valueOf(textFieldLat.getText()), Float.valueOf(textFieldLng.getText()));
+            addUserEntry(()->{
+                openHome(login);
+                clearFields();
+            });
         }
         else{
             alert.show("Ops!", "Parece que o usuario "+login+" ainda não foi cadastrado!");
@@ -139,8 +147,14 @@ public class FXMLLoginDocumentController implements Initializable {
         stage.show();
     }
     
-    /*public void init(){
+    /**
+     * Metodo para pegar referencia JAVASPACE
+     * Adiciona o usuário q efetuou login
+     * @param callback 
+     */
+    public void addUserEntry(Runnable callback){
         System.out.println("Procurando pelo servico JavaSpace...");
+        loading(true);
         
         Thread t = new Thread(()->{
             Lookup finder = new Lookup(JavaSpace.class);
@@ -149,24 +163,60 @@ public class FXMLLoginDocumentController implements Initializable {
                 System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
             } 
             System.out.println("O servico JavaSpace foi encontrado.");
-
-            UserEntry user = new UserEntry();
-            user.setAttributes("admin", "admin");
-
-            try {
-                this.javaSpace.write(user, null, Long.MAX_VALUE);
-                System.out.println("User "+ user.login +" adicionado");
-                
-                loading(false);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             
+                
+            getCounterEntry(()->{
+                try {
+                    user.id = counter.increaseUser();
+                    this.javaSpace.write(user, null, Lease.FOREVER);
+                    this.javaSpace.take(new CounterEntry(), null, 3 * 1000);
+                    this.javaSpace.write(counter, null, Lease.FOREVER);
+                    System.out.println("User "+user.id +"-"+ user.login +" adicionado");
+                    loading(false);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
+                if(callback != null){
+                    Platform.runLater(callback);
+                }
+            });
         });
         t.setDaemon(true);
         t.start();
-    }*/
+    }
+    
+    /**
+     * 
+     */
+    public void getCounterEntry(Runnable callback){
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 10 * 1000);
+                if (counter == null) {
+                    counter = new CounterEntry();
+                    counter.lastIdRoom = 0;
+                    counter.lastIdUser = 0;
+                    System.out.println("Adicionando counter pela primeira vez");
+                    this.javaSpace.write(counter, null, Lease.FOREVER);
+                    
+                }else {
+                    System.out.println("Counter já existe");
+                }
+                
+                if(callback != null){
+                    callback.run();
+                }
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
     
     private void loading(Boolean flag){
         loadingPane.setVisible(flag);
