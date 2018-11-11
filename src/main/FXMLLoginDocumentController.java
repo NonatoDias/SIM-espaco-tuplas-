@@ -57,36 +57,94 @@ public class FXMLLoginDocumentController implements Initializable {
     private JFXButton btnLogin;
 
     @FXML
-    private StackPane dialogStackPane;
+    private StackPane dialogPane;
 
     @FXML
     private JFXTextField textFieldLogin;
 
     @FXML
-    private JFXButton btnSignIn;
+    private JFXButton btnSignUp;
 
     @FXML
     private JFXPasswordField textFieldPass;
+    
+    @FXML
+    private JFXTextField textFieldLat;
+
+    @FXML
+    private JFXTextField textFieldLng;
+
 
     JavaSpace javaSpace;
+    Dialog alert;
+    UserStorage userStorage = new UserStorage();
     
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        btnLogin.setOnAction((e)->{
-            openHome();
+        clearFields();
+        alert = new Dialog(dialogPane, (e)->{
+            
         });
         
-        loadingPane.toFront();
-        loading(true);
+        btnLogin.setOnAction((e)->{
+            login(textFieldLogin.getText(), textFieldPass.getText());
+        });
         
+        btnSignUp.setOnAction((e)->{
+            signUp(textFieldLogin.getText(), textFieldPass.getText());
+        });
+        
+        userStorage.init();
+        loadingPane.toFront();
+        loading(false);
+    }    
+    
+    public void login(String login, String pass){
+        if(userStorage.hasUser(login, pass)){
+            openHome(login);
+            clearFields();
+        }
+        else{
+            alert.show("Ops!", "Parece que o usuario "+login+" ainda não foi cadastrado!");
+        }
+    }
+    
+    public void signUp(String login, String pass){
+        if(!userStorage.hasUser(login, pass)){
+            alert.show("Bem vindo!", "O usuario "+login+" foi cadastrado com sucesso!");
+            userStorage.addUser(login, pass);
+        }
+        else{
+            alert.show("Ops!", "Parece que o usuario "+login+" já foi cadastrado!");
+        }
+    }
+    
+    public void openHome(String login){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLHome.fxml")); 
+        Parent home = null;  
+        try {
+            home = (Parent)loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+        FXMLHomeController ctrl = loader.<FXMLHomeController>getController();
+        ctrl.setUserName(login, textFieldLat.getText(), textFieldLng.getText());
+        
+        Scene scene = new Scene(home);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+    
+    public void init(){
         System.out.println("Procurando pelo servico JavaSpace...");
-        /*Platform.runLater(()->{
-            
-        });*/
-        new Thread(()->{
+        
+        Thread t = new Thread(()->{
             Lookup finder = new Lookup(JavaSpace.class);
             this.javaSpace = (JavaSpace) finder.getService();
             if (this.javaSpace == null) {
@@ -107,25 +165,20 @@ public class FXMLLoginDocumentController implements Initializable {
                 e.printStackTrace();
             }
             
-        }).start();
-    }    
-    
-    public void openHome(){
-        Parent home = null;
-        try {
-            home = FXMLLoader.load(getClass().getResource("FXMLHome.fxml"));
-        } catch (IOException ex) {
-            Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Scene scene = new Scene(home);
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
+        });
+        t.setDaemon(true);
+        t.start();
     }
     
     private void loading(Boolean flag){
         loadingPane.setVisible(flag);
+    }
+
+    private void clearFields() {
+        textFieldLogin.setText("admin");
+        textFieldPass.setText("admin");
+        textFieldLat.setText("0.0");
+        textFieldLng.setText("0.0");
     }
     
 }

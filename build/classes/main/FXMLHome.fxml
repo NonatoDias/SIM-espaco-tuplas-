@@ -51,14 +51,14 @@
                   <Image url="@../img/user.png" />
                </image>
             </ImageView>
-            <Label layoutX="101.0" layoutY="134.0" prefHeight="21.0" prefWidth="94.0" text="Nonato Dias" />
+            <Label fx:id="labelUser" alignment="CENTER" layoutX="101.0" layoutY="134.0" prefHeight="21.0" prefWidth="94.0" text="User" textAlignment="CENTER" />
             <Label layoutX="43.0" layoutY="186.0" text="Latitude" />
             <Label layoutX="43.0" layoutY="221.0" text="Longitude" />
             <JFXButton fx:id="btnRadar" buttonType="RAISED" layoutX="35.0" layoutY="322.0" prefHeight="41.0" prefWidth="211.0" style="-fx-background-color: #2196f3;" text="Ligar Radar" textFill="WHITE" />
-            <JFXTextField fx:id="textFieldLat" focusColor="#2196f3" layoutX="124.0" layoutY="172.0" prefHeight="31.0" prefWidth="119.0" />
-            <JFXTextField fx:id="textFieldLng" focusColor="#2196f3" layoutX="124.0" layoutY="211.0" prefHeight="31.0" prefWidth="119.0" />
-            <Label layoutX="44.0" layoutY="258.0" text="Distância" />
-            <JFXTextField fx:id="textFieldDistance" focusColor="#2196f3" layoutX="123.0" layoutY="251.0" prefHeight="31.0" prefWidth="119.0" />
+            <JFXTextField fx:id="textFieldLat" alignment="CENTER" focusColor="#2196f3" layoutX="124.0" layoutY="172.0" prefHeight="31.0" prefWidth="119.0" />
+            <JFXTextField fx:id="textFieldLng" alignment="CENTER" focusColor="#2196f3" layoutX="124.0" layoutY="211.0" prefHeight="31.0" prefWidth="119.0" />
+            <Label layoutX="44.0" layoutY="258.0" text="Raio (km)" />
+            <JFXTextField fx:id="textFieldRadius" alignment="CENTER" focusColor="#2196f3" layoutX="123.0" layoutY="251.0" prefHeight="31.0" prefWidth="119.0" />
          </children>
       </Pane>
    </children>

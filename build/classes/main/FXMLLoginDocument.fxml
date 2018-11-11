@@ -14,6 +14,7 @@
 
 <AnchorPane id="AnchorPane" prefHeight="590.0" prefWidth="559.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLLoginDocumentController">
    <children>
+      <StackPane fx:id="dialogPane" prefHeight="600.0" prefWidth="561.0" />
       <StackPane fx:id="loadingPane" prefHeight="590.0" prefWidth="559.0">
          <children>
             <Pane opacity="0.4" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;">
@@ -32,28 +33,40 @@
             </Label>
          </children>
       </Pane>
-      <Pane layoutX="78.0" layoutY="92.0" prefHeight="438.0" prefWidth="411.0" style="-fx-background-color: white;">
+      <Pane layoutX="78.0" layoutY="92.0" prefHeight="483.0" prefWidth="411.0" style="-fx-background-color: white;">
          <children>
-            <JFXButton fx:id="btnLogin" buttonType="RAISED" layoutX="76.0" layoutY="290.0" prefHeight="41.0" prefWidth="262.0" style="-fx-background-color: #2196f3;" text="Entrar" textFill="WHITE" />
+            <JFXButton fx:id="btnLogin" buttonType="RAISED" layoutX="76.0" layoutY="351.0" prefHeight="41.0" prefWidth="262.0" style="-fx-background-color: #2196f3;" text="Entrar" textFill="WHITE" />
             <StackPane fx:id="dialogStackPane" layoutY="6.0" prefHeight="400.0" prefWidth="506.0" visible="false" />
             <Label layoutX="78.0" layoutY="123.0" prefHeight="30.0" prefWidth="103.0" text="Login" textFill="#909090">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <JFXTextField fx:id="textFieldLogin" focusColor="#2196f3" layoutX="76.0" layoutY="156.0" prefHeight="31.0" prefWidth="262.0" />
-            <Label layoutX="76.0" layoutY="207.0" prefHeight="30.0" prefWidth="103.0" text="Pass" textFill="#a1a1a1">
+            <JFXTextField fx:id="textFieldLogin" focusColor="#2196f3" layoutX="76.0" layoutY="150.0" prefHeight="31.0" prefWidth="262.0" />
+            <Label layoutX="76.0" layoutY="201.0" prefHeight="30.0" prefWidth="103.0" text="Pass" textFill="#a1a1a1">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <JFXButton fx:id="btnSignIn" buttonType="RAISED" layoutX="76.0" layoutY="346.0" prefHeight="41.0" prefWidth="262.0" style="-fx-background-color: #2196f3;" text="Cadastrar" textFill="WHITE" />
+            <JFXButton fx:id="btnSignUp" buttonType="RAISED" layoutX="76.0" layoutY="407.0" prefHeight="41.0" prefWidth="262.0" style="-fx-background-color: #2196f3;" text="Cadastrar" textFill="WHITE" />
             <ImageView fitHeight="83.0" fitWidth="127.0" layoutX="164.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../img/user.png" />
                </image>
             </ImageView>
-            <JFXPasswordField fx:id="textFieldPass" focusColor="#2196f3" layoutX="76.0" layoutY="238.0" prefHeight="31.0" prefWidth="262.0" />
+            <JFXPasswordField fx:id="textFieldPass" focusColor="#2196f3" layoutX="76.0" layoutY="229.0" prefHeight="31.0" prefWidth="262.0" />
+            <Label layoutX="75.0" layoutY="296.0" prefHeight="30.0" prefWidth="43.0" text="Lat:" textFill="#a1a1a1">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Label layoutX="210.0" layoutY="295.0" prefHeight="30.0" prefWidth="43.0" text="Lng:" textFill="#a1a1a1">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <JFXTextField fx:id="textFieldLat" alignment="CENTER" focusColor="#2196f3" layoutX="118.0" layoutY="294.0" prefHeight="31.0" prefWidth="75.0" />
+            <JFXTextField fx:id="textFieldLng" alignment="CENTER" focusColor="#2196f3" layoutX="261.0" layoutY="294.0" prefHeight="31.0" prefWidth="75.0" />
          </children>
       </Pane>
    </children>

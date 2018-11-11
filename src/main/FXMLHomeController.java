@@ -8,12 +8,21 @@ package main;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXTreeTableView;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
 import main.tuplas.UserEntry;
 import main.util.Lookup;
 import net.jini.space.JavaSpace;
@@ -44,7 +53,11 @@ public class FXMLHomeController implements Initializable {
     private JFXTextField textFieldLng;
 
     @FXML
-    private JFXTextField textFieldDistance;
+    private JFXTextField textFieldRadius;
+    
+    @FXML
+    private Label labelUser;
+        
     /**
      * Initializes the controller class.
      */
@@ -52,11 +65,15 @@ public class FXMLHomeController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
         loadingPane.toFront();
-        loading(true);
+        loading(false);
         
-        new Thread(()->{
+        btnAddRoom.setOnAction((e)->{
+            openRoom();
+        });
+        
+        /*new Thread(()->{
             init();
-        }).start();
+        }).start();*/
     }    
     
     public void init(){
@@ -89,8 +106,29 @@ public class FXMLHomeController implements Initializable {
         t.start();
     }
     
+    public void setUserName(String login, String lat, String lng){
+        labelUser.setText(login);
+        textFieldLat.setText(lat);
+        textFieldLng.setText(lng);
+        textFieldRadius.setText("1");
+    }
+    
     private void loading(Boolean flag){
         loadingPane.setVisible(flag);
+    }
+    
+    public void openRoom(){
+        Parent home = null;
+        try {
+            home = FXMLLoader.load(getClass().getResource("FXMLRoom.fxml"));
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Scene scene = new Scene(home);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
     }
     
 }

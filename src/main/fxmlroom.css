@@ -1,0 +1,17 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+
+}
+
+
+.tool-bar{
+    -fx-background-color: #2196f3;
+}
+
+
+.bg-white-smoke{
+    -fx-background-color: #f5f5f5;
+}
