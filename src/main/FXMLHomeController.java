@@ -13,6 +13,8 @@ import com.jfoenix.controls.RecursiveTreeItem;
 import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,8 +35,10 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import main.tuplas.UserEntry;
+import main.tuplas.UserRoomEntry;
 import main.util.Lookup;
 import main.util.RoomTreeObject;
+import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
 
 /**
@@ -70,23 +74,22 @@ public class FXMLHomeController implements Initializable {
     
     JavaSpace javaSpace;
     UserEntry user = new UserEntry();
+    List<String> roomsAux = new ArrayList<String>();
         
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
         loadingPane.toFront();
-        
+        loading(false);
         btnAddRoom.setOnAction((e)->{
-            openRoom();
+            addRoom();
         });
         
-        //loading(false);
-        //creatTableRoom();
-        
-        creatTableRoom();
+        btnRadar.setOnAction((e)->{
+            getUserInRadar();
+        });
         
         setUserConfigs("admin", "0", "0");
         initAndAddUserEntry(()->{
@@ -94,36 +97,11 @@ public class FXMLHomeController implements Initializable {
         });
     }    
     
-    public void init(){
-        /*System.out.println("Procurando pelo servico JavaSpace...");
-        Lookup finder = new Lookup(JavaSpace.class);
-        JavaSpace space = (JavaSpace) finder.getService();
-        if (space == null) {
-            System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
-            System.exit(-1);
-        } 
-        System.out.println("O servico JavaSpace foi encontrado.");
-        
-        Thread t = new Thread(() -> {
-            while (true) {
-                try {
-                    UserEntry template = new UserEntry();
-                    UserEntry user = (UserEntry) space.take(template, null, 60 * 1000);
-                    if (user == null) {
-                        System.out.println("Tempo de espera esgotado. Encerrando...");
-                        System.exit(0);
-                    }
-                    System.out.println("Mensagem recebida: "+ user.login);
-                    
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        t.setDaemon(true);
-        t.start();*/
-    }
-    
+    /**
+     * Metodo para pegar referencia JAVASPACE
+     * Adiciona o usuário q efetuou login
+     * @param callback 
+     */
     public void initAndAddUserEntry(Runnable callback){
         System.out.println("Procurando pelo servico JavaSpace...");
         loading(true);
@@ -136,9 +114,63 @@ public class FXMLHomeController implements Initializable {
             } 
             System.out.println("O servico JavaSpace foi encontrado.");
             try {
-                this.javaSpace.write(user, null, Long.MAX_VALUE);
+                this.javaSpace.write(user, null, Lease.FOREVER);
                 System.out.println("User "+ user.login +" adicionado");
                 loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            if(callback != null){
+                callback.run();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    /**
+     * Adiciona as configurações do usuario na View
+     * Defini o userEntry
+     * @param login
+     * @param lat
+     * @param lng 
+     */
+    public void setUserConfigs(String login, String lat, String lng){
+        labelUser.setText(login);
+        textFieldLat.setText(lat);
+        textFieldLng.setText(lng);
+        textFieldRadius.setText("1");        
+        user.setAttributes(1, login, Float.valueOf(lat), Float.valueOf(lng));
+    }
+    
+    private void addRoom() {
+        String name = "Sala 1";
+        roomsAux.add(name);
+        addUserRoomEntry(name, ()->{
+            creatTableRoom();
+        });
+    }
+    
+    private void removeRoom(int index) {
+        String r = roomsAux.remove(index);
+        removeUserRoomEntry(r, ()->{
+            creatTableRoom();
+        });
+    }
+    
+    public void addUserRoomEntry(String roomName, Runnable callback){
+        loading(true);
+        UserRoomEntry userRoom = new UserRoomEntry();
+        Thread t = new Thread(()->{
+            try {
+                userRoom.setAttributes(user.login, roomName);
+                this.javaSpace.write(userRoom, null, Lease.FOREVER);
+                System.out.println("userRoom "+ roomName +" adicionado");
+                loading(false);
+                if(callback != null){
+                    Platform.runLater(callback);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -147,19 +179,36 @@ public class FXMLHomeController implements Initializable {
         t.start();
     }
     
-    public void setUserConfigs(String login, String lat, String lng){
-        labelUser.setText(login);
-        textFieldLat.setText(lat);
-        textFieldLng.setText(lng);
-        textFieldRadius.setText("1");        
-        user.setAttributes(login, Float.valueOf(lat), Float.valueOf(lng));
+    public void removeUserRoomEntry(String roomName, Runnable callback){
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                UserRoomEntry template = new UserRoomEntry();
+                template.roomName = roomName;
+                UserRoomEntry userRoom = (UserRoomEntry) this.javaSpace.take(template, null, 60 * 1000);
+                if (template == null) {
+                    System.out.println("Tempo de espera esgotado. Encerrando...");
+                    
+                }else {
+                    System.out.println("APAGAR userRoom "+ roomName +" OK");
+                }
+                loading(false);
+                if(callback != null){
+                    Platform.runLater(callback);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
     }
     
     private void loading(Boolean flag){
         loadingPane.setVisible(flag);
     }
     
-    public void openRoom(){
+    public void openRoom(int index){
         Parent p = null;
         try {
             p = FXMLLoader.load(getClass().getResource("FXMLRoom.fxml"));
@@ -178,14 +227,14 @@ public class FXMLHomeController implements Initializable {
         
         //Coluna NOME
         JFXTreeTableColumn<RoomTreeObject, String> name = new JFXTreeTableColumn<RoomTreeObject, String>("Salas disponíveis");
-        name.setPrefWidth(2*width/3);
+        name.setPrefWidth(width-240);
         name.setCellValueFactory((param)->{
             return param.getValue().getValue().name;
         });
         
-        //Coluna AÇÕES
+        //Coluna Entrar
         JFXTreeTableColumn<RoomTreeObject, String> action = new JFXTreeTableColumn<RoomTreeObject, String>("Ações");
-        action.setPrefWidth(width/3);
+        action.setPrefWidth(110);
         action.setCellFactory((final TreeTableColumn<RoomTreeObject, String> param) -> {
             final TreeTableCell<RoomTreeObject, String> cell = new TreeTableCell<RoomTreeObject, String>() {
                 final JFXButton btn = new JFXButton("Entrar");
@@ -203,8 +252,37 @@ public class FXMLHomeController implements Initializable {
                         //btn.setStyle("-fx-background-color: #F39C12; -fx-text-fill: white;");
                         btn.getStyleClass().add("btn-primary");
                         btn.setOnAction(event -> {
-                            System.out.println(getIndex());
-                            openRoom();
+                            openRoom(getIndex());
+                        });
+                        setGraphic(btn);
+                        setText(null);
+                    }
+                }
+            };
+            return cell;
+        });
+              
+        //Coluna Apagar
+        JFXTreeTableColumn<RoomTreeObject, String> actionDelete = new JFXTreeTableColumn<RoomTreeObject, String>("");
+        actionDelete.setPrefWidth(110);
+        actionDelete.setCellFactory((final TreeTableColumn<RoomTreeObject, String> param) -> {
+            final TreeTableCell<RoomTreeObject, String> cell = new TreeTableCell<RoomTreeObject, String>() {
+                final JFXButton btn = new JFXButton("Apagar");
+                
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        
+                        //Callback do botão
+                        btn.setButtonType(JFXButton.ButtonType.RAISED);
+                        //btn.setStyle("-fx-background-color: #F39C12; -fx-text-fill: white;");
+                        btn.getStyleClass().add("btn-danger");
+                        btn.setOnAction(event -> {
+                            removeRoom(getIndex());
                         });
                         setGraphic(btn);
                         setText(null);
@@ -215,13 +293,39 @@ public class FXMLHomeController implements Initializable {
         });
         
         ObservableList<RoomTreeObject> rooms = FXCollections.observableArrayList();
-        rooms.add(new RoomTreeObject("SAla 1"));
-        rooms.add(new RoomTreeObject("SAla 2"));
+        for(String r: roomsAux){
+            rooms.add(new RoomTreeObject(r));
+        }
         
         final TreeItem<RoomTreeObject> root = new RecursiveTreeItem<RoomTreeObject>(rooms, RecursiveTreeObject::getChildren);
-        tableRooms.getColumns().setAll(name, action);
+        tableRooms.getColumns().setAll(name, action, actionDelete);
         tableRooms.setRoot(root);
         tableRooms.setShowRoot(false);
     }
     
+    public void getUserInRadar(){
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                boolean flag = true;
+                int count = 0;
+                UserEntry template = new UserEntry();
+                while(flag){
+                    UserEntry user = (UserEntry) this.javaSpace.take(template, null, 60 * 1000);
+                    if (user == null) {
+                        System.out.println("Tempo de espera esgotado. Encerrando...");
+                        flag = false;
+                    }else {
+                        count++;
+                        System.out.println(count + " - Lendo ... "+ user.login);
+                    }
+                }
+                loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
 }
