@@ -11,6 +11,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
@@ -38,10 +39,14 @@
             </Label>
          </left>
       </JFXToolbar>
-      <Pane layoutX="305.0" layoutY="62.0" prefHeight="583.0" prefWidth="612.0">
+      <Pane layoutX="305.0" layoutY="62.0" prefHeight="583.0" prefWidth="611.0">
          <children>
             <JFXButton fx:id="btnAddRoom" buttonType="RAISED" layoutX="517.0" layoutY="487.0" prefHeight="52.0" prefWidth="67.0" styleClass="btn-float-primary" text="+" textFill="WHITE" />
-            <JFXTreeTableView fx:id="tableRooms" layoutY="14.0" prefHeight="464.0" prefWidth="587.0" />
+            <FlowPane layoutY="21.0" prefHeight="432.0" prefWidth="587.0">
+               <children>
+                  <JFXTreeTableView fx:id="tableRooms" prefHeight="440.0" prefWidth="587.0" />
+               </children>
+            </FlowPane>
          </children>
       </Pane>
       <Pane layoutY="62.0" prefHeight="583.0" prefWidth="276.0" styleClass="bg-white-smoke">
