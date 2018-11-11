@@ -15,3 +15,12 @@
 .bg-white-smoke{
     -fx-background-color: #f5f5f5;
 }
+
+.txt-flow{
+    -fx-text-box-border: #f5f5f5;
+    -fx-padding: 10;
+}
+
+.txt-flow:focused {
+    -fx-focus-color: transparent;
+}

@@ -208,12 +208,17 @@ public class FXMLHomeController implements Initializable {
     }
     
     public void openRoom(int index){
-        Parent p = null;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLRoom.fxml")); 
+        Parent p = null;  
         try {
-            p = FXMLLoader.load(getClass().getResource("FXMLRoom.fxml"));
+            p = (Parent)loader.load();
         } catch (IOException ex) {
             Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    
+        FXMLRoomController ctrl = loader.<FXMLRoomController>getController();
+        ctrl.setUserRoomConfigs(user.login, textFieldLat.getText(), textFieldLng.getText(), "1");
+        
         Scene scene = new Scene(p);
         Stage stage = new Stage();
         stage.setScene(scene);
@@ -311,11 +316,11 @@ public class FXMLHomeController implements Initializable {
                 UserEntry template = new UserEntry();
                 while(count <= counter.lastIdUser){
                     template.id = count;
-                    UserEntry user = (UserEntry) this.javaSpace.read(template, null, 3 * 1000);
-                    if (user == null) {
+                    UserEntry userAux = (UserEntry) this.javaSpace.read(template, null, 3 * 1000);
+                    if (userAux == null) {
                         System.out.println("Tempo de espera esgotado. Encerrando...");
                     }else {
-                        System.out.println(" - Lendo ... "+ user.id + " - "+ user.login);
+                        System.out.println(" - Lendo ... "+ userAux.id + " - "+ userAux.login + "     d= "+ getDistance(userAux, user));
                     }
                     count++;
                 }
@@ -326,5 +331,11 @@ public class FXMLHomeController implements Initializable {
         });
         t.setDaemon(true);
         t.start();
+    }
+    
+    public double getDistance(UserEntry u1, UserEntry u2){
+        Float a = u2.lat - u1.lat;
+        Float b = u2.lng - u1.lng;
+        return Math.sqrt(Math.abs(a*a - b*b));
     }
 }

@@ -157,13 +157,15 @@ public class FXMLLoginDocumentController implements Initializable {
         loading(true);
         
         Thread t = new Thread(()->{
-            Lookup finder = new Lookup(JavaSpace.class);
-            this.javaSpace = (JavaSpace) finder.getService();
-            if (this.javaSpace == null) {
-                System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
-            } 
-            System.out.println("O servico JavaSpace foi encontrado.");
-            
+            if(this.javaSpace == null){
+                Lookup finder = new Lookup(JavaSpace.class);
+                this.javaSpace = (JavaSpace) finder.getService();
+                if (this.javaSpace == null) {
+                    System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+                    return;
+                } 
+                System.out.println("O servico JavaSpace foi encontrado.");
+            }
                 
             getCounterEntry(()->{
                 try {
