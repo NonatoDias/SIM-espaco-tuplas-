@@ -13,12 +13,14 @@ import net.jini.core.entry.Entry;
  */
 public class UserEntry implements Entry{
     public String login;
-    public String password;
+    public Float lat;
+    public Float lng;
     
     public UserEntry(){};
     
-    public void setAttributes(String login, String pass){
+    public void setAttributes(String login, Float lat, Float lng) {
         this.login = login;
-        this.password = pass;
+        this.lat = lat;
+        this.lng = lng;
     }
 }

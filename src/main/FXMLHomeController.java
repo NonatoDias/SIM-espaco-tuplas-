@@ -57,6 +57,9 @@ public class FXMLHomeController implements Initializable {
     
     @FXML
     private Label labelUser;
+    
+    JavaSpace javaSpace;
+    UserEntry user = new UserEntry();
         
     /**
      * Initializes the controller class.
@@ -65,19 +68,18 @@ public class FXMLHomeController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
         loadingPane.toFront();
-        loading(false);
         
         btnAddRoom.setOnAction((e)->{
             openRoom();
         });
         
-        /*new Thread(()->{
-            init();
-        }).start();*/
+        initAndAddUserEntry(()->{
+        
+        });
     }    
     
     public void init(){
-        System.out.println("Procurando pelo servico JavaSpace...");
+        /*System.out.println("Procurando pelo servico JavaSpace...");
         Lookup finder = new Lookup(JavaSpace.class);
         JavaSpace space = (JavaSpace) finder.getService();
         if (space == null) {
@@ -103,14 +105,38 @@ public class FXMLHomeController implements Initializable {
             }
         });
         t.setDaemon(true);
+        t.start();*/
+    }
+    
+    public void initAndAddUserEntry(Runnable callback){
+        System.out.println("Procurando pelo servico JavaSpace...");
+        loading(true);
+        
+        Thread t = new Thread(()->{
+            Lookup finder = new Lookup(JavaSpace.class);
+            this.javaSpace = (JavaSpace) finder.getService();
+            if (this.javaSpace == null) {
+                System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+            } 
+            System.out.println("O servico JavaSpace foi encontrado.");
+            try {
+                this.javaSpace.write(user, null, Long.MAX_VALUE);
+                System.out.println("User "+ user.login +" adicionado");
+                loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
         t.start();
     }
     
-    public void setUserName(String login, String lat, String lng){
+    public void setUserConfigs(String login, String lat, String lng){
         labelUser.setText(login);
         textFieldLat.setText(lat);
         textFieldLng.setText(lng);
-        textFieldRadius.setText("1");
+        textFieldRadius.setText("1");        
+        user.setAttributes(login, Float.valueOf(lat), Float.valueOf(lng));
     }
     
     private void loading(Boolean flag){

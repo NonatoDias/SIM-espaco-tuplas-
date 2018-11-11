@@ -74,8 +74,6 @@ public class FXMLLoginDocumentController implements Initializable {
     @FXML
     private JFXTextField textFieldLng;
 
-
-    JavaSpace javaSpace;
     Dialog alert;
     UserStorage userStorage = new UserStorage();
     
@@ -132,7 +130,7 @@ public class FXMLLoginDocumentController implements Initializable {
         }
     
         FXMLHomeController ctrl = loader.<FXMLHomeController>getController();
-        ctrl.setUserName(login, textFieldLat.getText(), textFieldLng.getText());
+        ctrl.setUserConfigs(login, textFieldLat.getText(), textFieldLng.getText());
         
         Scene scene = new Scene(home);
         Stage stage = new Stage();
@@ -141,7 +139,7 @@ public class FXMLLoginDocumentController implements Initializable {
         stage.show();
     }
     
-    public void init(){
+    /*public void init(){
         System.out.println("Procurando pelo servico JavaSpace...");
         
         Thread t = new Thread(()->{
@@ -168,7 +166,7 @@ public class FXMLLoginDocumentController implements Initializable {
         });
         t.setDaemon(true);
         t.start();
-    }
+    }*/
     
     private void loading(Boolean flag){
         loadingPane.setVisible(flag);
