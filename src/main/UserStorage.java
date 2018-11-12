@@ -62,4 +62,24 @@ public class UserStorage {
         }
         return hasIt;
     }
+    
+    public boolean hasUserLogin(String login){
+        String line = null;
+        boolean hasIt = false;
+        try {
+            FileReader fileReader = new FileReader(filepath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            while((line = bufferedReader.readLine()) != null && hasIt == false) {
+                String[] parts = line.split(divider);
+                if(parts[0].equals(login)){
+                    hasIt = true;
+                }
+            }   
+            bufferedReader.close();    
+        }catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return hasIt;
+    }
 }

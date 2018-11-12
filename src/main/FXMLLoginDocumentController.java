@@ -114,17 +114,17 @@ public class FXMLLoginDocumentController implements Initializable {
             });
         }
         else{
-            alert.show("Ops!", "Parece que o usuario "+login+" ainda não foi cadastrado!");
+            alert.show("Ops!", "Parece que você errou a senha!");
         }
     }
     
     public void signUp(String login, String pass){
-        if(!userStorage.hasUser(login, pass)){
+        if(!userStorage.hasUserLogin(login)){
             alert.show("Bem vindo!", "O usuario "+login+" foi cadastrado com sucesso!");
             userStorage.addUser(login, pass);
         }
         else{
-            alert.show("Ops!", "Parece que o usuario "+login+" já foi cadastrado!");
+            alert.show("Ops!", "Desculpe o login "+login+" não está disponível!");
         }
     }
     
@@ -143,6 +143,9 @@ public class FXMLLoginDocumentController implements Initializable {
         Scene scene = new Scene(home);
         Stage stage = new Stage();
         stage.setScene(scene);
+        stage.setOnCloseRequest((e)->{
+            ctrl.onCloseRequest();
+        });
         stage.setResizable(false);
         stage.show();
     }
@@ -157,33 +160,57 @@ public class FXMLLoginDocumentController implements Initializable {
         loading(true);
         
         Thread t = new Thread(()->{
+            boolean isUserLogged = true;
             if(this.javaSpace == null){
                 Lookup finder = new Lookup(JavaSpace.class);
                 this.javaSpace = (JavaSpace) finder.getService();
                 if (this.javaSpace == null) {
                     System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+                    alert.show("ERROR", "O servico JavaSpace não foi encontrado!");
                     return;
                 } 
                 System.out.println("O servico JavaSpace foi encontrado.");
             }
+            
+            try {
+                UserEntry templateU = new UserEntry();
+                templateU.login = user.login;
+                System.out.println("Verificando se "+user.login+" já está logado");
+                UserEntry userAux = (UserEntry) this.javaSpace.read(templateU, null, 3 * 1000);
+                if (userAux != null) {
+                    isUserLogged = false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                isUserLogged = false;
+            }
                 
-            getCounterEntry(()->{
-                try {
-                    user.id = counter.increaseUser();
-                    this.javaSpace.write(user, null, Lease.FOREVER);
-                    this.javaSpace.take(new CounterEntry(), null, 3 * 1000);
-                    this.javaSpace.write(counter, null, Lease.FOREVER);
-                    System.out.println("User "+user.id +"-"+ user.login +" adicionado");
-                    loading(false);
+            if(isUserLogged){
+                getCounterEntry(()->{
+                    try {
+                        user.id = counter.increaseUser();
+                        this.javaSpace.write(user, null, Lease.FOREVER);
+                        this.javaSpace.take(new CounterEntry(), null, 3 * 1000);
+                        this.javaSpace.write(counter, null, Lease.FOREVER);
+                        System.out.println("User "+user.id +"-"+ user.login +" adicionado");
+                        loading(false);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    if(callback != null){
+                        Platform.runLater(callback);
+                    }
+                });
                 
-                if(callback != null){
-                    Platform.runLater(callback);
-                }
-            });
+            }else{
+                System.out.println(user.login+" já está logado!");
+                Platform.runLater(()->{
+                    alert.show("Usuário Logado!", "O login "+user.login+" já foi efetuado!");
+                });
+                loading(false);
+            }
         });
         t.setDaemon(true);
         t.start();

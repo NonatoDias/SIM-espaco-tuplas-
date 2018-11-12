@@ -388,4 +388,25 @@ public class FXMLHomeController implements Initializable {
         Float b = u2.lng - u1.lng;
         return Math.sqrt(Math.abs(a*a - b*b));
     }
+    
+    //Evento adicionado ao stage
+    public void onCloseRequest(){
+        System.out.println("Closing ...");
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                UserEntry template = new UserEntry();
+                template.login = user.login;
+                UserEntry userAux = (UserEntry) this.javaSpace.take(template, null, 3 * 1000);
+                if(userAux != null){
+                    System.out.println("Logout " + userAux.login);
+                }
+                loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
 }
