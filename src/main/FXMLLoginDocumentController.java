@@ -192,7 +192,7 @@ public class FXMLLoginDocumentController implements Initializable {
                         this.javaSpace.write(user, null, Lease.FOREVER);
                         this.javaSpace.take(new CounterEntry(), null, 3 * 1000);
                         this.javaSpace.write(counter, null, Lease.FOREVER);
-                        System.out.println("User "+user.id +"-"+ user.login +" adicionado");
+                        System.out.println("User "+user.id +"-"+ user.login +"("+user.lat+", " + user.lng+")"+" adicionado");
                         loading(false);
 
                     } catch (Exception e) {

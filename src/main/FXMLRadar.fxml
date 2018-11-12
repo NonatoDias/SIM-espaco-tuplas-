@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXSpinner?>
+<?import com.jfoenix.controls.JFXToolbar?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="653.0" prefWidth="433.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FXMLRadarController">
+    <stylesheets>
+        <URL value="@fxmlroom.css" />
+    </stylesheets>
+   <children>
+      <StackPane fx:id="loadingPane" layoutX="-5.0" prefHeight="782.0" prefWidth="433.0">
+         <children>
+            <Pane opacity="0.4" prefHeight="654.0" prefWidth="934.0" style="-fx-background-color: white;">
+               <children>
+                  <JFXSpinner layoutX="173.0" layoutY="310.0" prefHeight="104.0" prefWidth="103.0" />
+               </children>
+            </Pane>
+         </children>
+      </StackPane>
+      <JFXToolbar prefHeight="72.0" prefWidth="433.0" styleClass="tool-bar">
+         <left>
+            <Label fx:id="labelRadar" alignment="CENTER" prefHeight="41.0" prefWidth="400.0" style="-fx-padding: 0 0 0 20;" text="RADAR" textAlignment="CENTER" textFill="WHITE" BorderPane.alignment="CENTER">
+               <font>
+                  <Font name="Calibri Bold" size="24.0" />
+               </font>
+            </Label>
+         </left>
+      </JFXToolbar>
+      <Pane layoutY="84.0" prefHeight="684.0" prefWidth="433.0" styleClass="bg-white-smoke">
+         <children>
+            <FlowPane layoutX="18.0" prefHeight="634.0" prefWidth="402.0" style="-fx-background-color: transparent;">
+               <children>
+                  <JFXListView fx:id="jFXListUsers" onMouseClicked="#handleMouseClick" prefHeight="657.0" prefWidth="402.0" style="-fx-background-color: transparent;" />
+               </children>
+            </FlowPane>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

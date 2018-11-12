@@ -93,11 +93,14 @@ public class FXMLHomeController implements Initializable {
         });
         
         btnRadar.setOnAction((e)->{
-            getUserInRadar();
+            openRadar();
+            //getUserInRadar();
         });
         
         btnUpdate.setOnAction((e)->{
-            getRooms();
+            updateUserEntry(()->{
+                getRooms();
+            });
         });
         
         //setUserConfigs("admin", "0", "0");
@@ -149,7 +152,7 @@ public class FXMLHomeController implements Initializable {
         labelUser.setText(login);
         textFieldLat.setText(lat);
         textFieldLng.setText(lng);
-        textFieldRadius.setText("1");        
+        textFieldRadius.setText("1000");        
         user.setAttributes(1, login, Float.valueOf(lat), Float.valueOf(lng));
     }
     
@@ -186,6 +189,34 @@ public class FXMLHomeController implements Initializable {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    public void updateUserEntry(Runnable callback){
+        loading(true);
+        Thread t = new Thread(()->{
+            UserEntry template = new UserEntry();
+            template.login = user.login;
+            try {
+                user = (UserEntry) this.javaSpace.take(template, null, 3 * 1000);
+                if(user != null){
+                    user.lat = Float.valueOf(textFieldLat.getText());
+                    user.lng = Float.valueOf(textFieldLng.getText());
+                    this.javaSpace.write(user, null, Lease.FOREVER);
+                    System.out.println("Usuario atualizado!");
+                }else{
+                    System.out.println("Error - Usuario nao atualizado!");
+                }
+                loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            if(callback != null){
+                callback.run();
             }
         });
         t.setDaemon(true);
@@ -232,6 +263,27 @@ public class FXMLHomeController implements Initializable {
     
         FXMLRoomController ctrl = loader.<FXMLRoomController>getController();
         ctrl.setUserRoomConfigs(user.login, textFieldLat.getText(), textFieldLng.getText(), roomsList.get(index));
+        
+        Scene scene = new Scene(p);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+    
+    public void openRadar(){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLRadar.fxml")); 
+        Parent p = null;  
+        try {
+            p = (Parent)loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLLoginDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+        FXMLRadarController ctrl = loader.<FXMLRadarController>getController();
+        user.lat = Float.valueOf(textFieldLat.getText());
+        user.lng = Float.valueOf(textFieldLng.getText());
+        ctrl.setUserConfigs(user, Float.valueOf(textFieldRadius.getText()));
         
         Scene scene = new Scene(p);
         Stage stage = new Stage();
@@ -390,6 +442,7 @@ public class FXMLHomeController implements Initializable {
     }
     
     //Evento adicionado ao stage
+    //qndo o stage é criado na tela de login
     public void onCloseRequest(){
         System.out.println("Closing ...");
         loading(true);
