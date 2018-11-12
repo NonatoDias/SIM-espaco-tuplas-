@@ -60,6 +60,9 @@ public class FXMLHomeController implements Initializable {
 
     @FXML
     private JFXButton btnRadar;
+    
+    @FXML
+    private JFXButton btnUpdate;
 
     @FXML
     private JFXTextField textFieldLat;
@@ -75,7 +78,8 @@ public class FXMLHomeController implements Initializable {
     
     JavaSpace javaSpace;
     UserEntry user = new UserEntry();
-    List<String> roomsAux = new ArrayList<String>();
+    CounterEntry counter = null;
+    List<String> roomsList = new ArrayList<String>();
         
     /**
      * Initializes the controller class.
@@ -90,6 +94,10 @@ public class FXMLHomeController implements Initializable {
         
         btnRadar.setOnAction((e)->{
             getUserInRadar();
+        });
+        
+        btnUpdate.setOnAction((e)->{
+            getRooms();
         });
         
         //setUserConfigs("admin", "0", "0");
@@ -119,7 +127,9 @@ public class FXMLHomeController implements Initializable {
             } catch (Exception e) {
                 e.printStackTrace();
             }*/
+            
             loading(false);
+            getRooms();
             if(callback != null){
                 callback.run();
             }
@@ -144,28 +154,32 @@ public class FXMLHomeController implements Initializable {
     }
     
     private void addRoom() {
-        String name = "Sala 1";
-        roomsAux.add(name);
-        addUserRoomEntry(name, ()->{
+        addUserRoomEntry(()->{
             creatTableRoom();
         });
     }
     
     private void removeRoom(int index) {
-        String r = roomsAux.remove(index);
+        String r = roomsList.remove(index);
         removeUserRoomEntry(r, ()->{
             creatTableRoom();
         });
     }
     
-    public void addUserRoomEntry(String roomName, Runnable callback){
+    public void addUserRoomEntry(Runnable callback){
         loading(true);
         UserRoomEntry userRoom = new UserRoomEntry();
         Thread t = new Thread(()->{
             try {
-                userRoom.setAttributes(user.login, roomName);
+                counter = (CounterEntry) this.javaSpace.take(new CounterEntry(), null, 3 * 1000);
+                Integer id = counter.increaseRoom();
+                String roomName = "Sala "+ id;
+                roomsList.add(roomName);
+                userRoom.setAttributes(id, user.login, roomName);
+                this.javaSpace.write(counter, null, Lease.FOREVER);
                 this.javaSpace.write(userRoom, null, Lease.FOREVER);
-                System.out.println("userRoom "+ roomName +" adicionado");
+                    
+                System.out.println("userRoom "+ userRoom.id + " - " + userRoom.roomName +" adicionado");
                 loading(false);
                 if(callback != null){
                     Platform.runLater(callback);
@@ -297,7 +311,7 @@ public class FXMLHomeController implements Initializable {
         });
         
         ObservableList<RoomTreeObject> rooms = FXCollections.observableArrayList();
-        for(String r: roomsAux){
+        for(String r: roomsList){
             rooms.add(new RoomTreeObject(r));
         }
         
@@ -312,7 +326,7 @@ public class FXMLHomeController implements Initializable {
         Thread t = new Thread(()->{
             try {
                 int count = 0;
-                CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 60 * 1000);
+                counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 3 * 1000);
                 UserEntry template = new UserEntry();
                 while(count <= counter.lastIdUser){
                     template.id = count;
@@ -325,6 +339,42 @@ public class FXMLHomeController implements Initializable {
                     count++;
                 }
                 loading(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    public void getRooms(){
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                int count = 0;
+                UserRoomEntry template = new UserRoomEntry();
+                UserRoomEntry userRoomAux = null;
+                Boolean flag = true;
+                counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 3 * 1000);
+                roomsList = new ArrayList<String>();
+                
+                loading(true);
+                while(count <= counter.lastIdRoom){
+                    template.id = count;
+                    userRoomAux = (UserRoomEntry) this.javaSpace.read(template, null, 3 * 1000);
+                    if (userRoomAux == null) {
+                        flag = false;
+                        System.out.println(" Nenhuma sala encontrada");
+                    }else {
+                        roomsList.add(userRoomAux.roomName);
+                        System.out.println(" - Lendo ... "+ userRoomAux.roomName);
+                    }
+                    count++;
+                }
+                Platform.runLater(()->{
+                    creatTableRoom();
+                    loading(false);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }

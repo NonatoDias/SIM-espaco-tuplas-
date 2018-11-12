@@ -134,7 +134,7 @@ public class FXMLRoomController implements Initializable {
         labelRoom.setText(roomName);     
         System.out.println("ROOM controller ");
         user.setAttributes(0, userLogin, Float.valueOf(lat), Float.valueOf(lng));
-        userRoom.setAttributes(userLogin, roomName);
+        userRoom.setAttributes(0, userLogin, roomName);
     }
     
     public void getUserInRadar(){

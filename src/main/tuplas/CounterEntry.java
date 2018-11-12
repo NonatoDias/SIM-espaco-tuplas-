@@ -24,4 +24,12 @@ public class CounterEntry implements Entry{
         }
         return null;
     }
+    
+    public Integer increaseRoom(){
+        if(lastIdRoom != null){
+            lastIdRoom = lastIdRoom + 1;
+            return lastIdRoom;
+        }
+        return null;
+    }
 }
