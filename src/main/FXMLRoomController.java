@@ -8,6 +8,8 @@ package main;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -93,7 +95,10 @@ public class FXMLRoomController implements Initializable {
         });
         
         //setUserRoomConfigs("admin", "0", "0", "Sala 1");
-        init(null);
+        init(()->{
+            initIntervalMessages();
+            initIntervalUserInRadar();
+        });
     }
 
     public void init(Runnable callback){
@@ -159,26 +164,39 @@ public class FXMLRoomController implements Initializable {
         userRoom.setAttributes(0, userLogin, roomName);
     }
     
-    public void getUserInRadar(){
-        loading(true);
+    public void initIntervalUserInRadar(){
+        //loading(true);
         Thread t = new Thread(()->{
-            usersList = new ArrayList<>();
+            List userEntryList = new ArrayList<UserEntry>();;
             try {
                 int count = 0;
-                CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 60 * 1000);
+                CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 10 *1000);
                 UserEntry template = new UserEntry();
                 while(count <= counter.lastIdUser){
                     template.id = count;
-                    UserEntry userAux = (UserEntry) this.javaSpace.read(template, null, 3 * 1000);
+                    UserEntry userAux = (UserEntry) this.javaSpace.read(template, null, 500);
                     if (userAux == null) {
-                        System.out.println("Tempo de espera esgotado. Encerrando...");
+                        System.out.println("nao encontrado: "+template.id);
                     }else {
-                        usersList.add(userAux.login);
+                        userEntryList.add(userAux);
                         System.out.println(" - Lendo ... "+ userAux.id + " - "+ userAux.login + "     d= "+ getDistance(userAux, user));
                     }
                     count++;
                 }
-                loading(false);
+                usersList = new ArrayList<>();
+                Platform.runLater(()->{
+                    jFXListUsers.getItems().setAll();
+                });
+                for(Object o : userEntryList){
+                    UserEntry u = (UserEntry) o;
+                    usersList.add(u.login);
+                    Platform.runLater(()->{
+                        jFXListUsers.getItems().add(new Label(u.id + " - " +u.login));
+                    });
+                }
+                Thread.sleep(1000);
+                initIntervalUserInRadar();
+                //loading(false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -198,7 +216,7 @@ public class FXMLRoomController implements Initializable {
     }
     
     public void addMessageToTheView(String msg, Paint value){
-        Text text = new Text("YOU:   " + msg+"\n");
+        Text text = new Text(msg+"\n");
         //text.setFill(value);
         text.setFont(Font.font("Helvetica", FontPosture.REGULAR, 15));
         this.msgTextFlow.getChildren().addAll(text);
@@ -214,12 +232,47 @@ public class FXMLRoomController implements Initializable {
                 message.setAttributes(user.login, userToLogin, msg);
                 this.javaSpace.write(message, null, Lease.FOREVER);
                     
-                String strMsg = "MENSAGEM de "+ message.from + " para "+ message.to + "\n    "+message.content;
+                String strMsg = "MENSAGEM de "+ message.from + " para "+ message.to + "    "+message.content;
                 System.out.println(strMsg);
                 loading(false);
                 Platform.runLater(()->{
-                    addMessageToTheView(msg, null);
+                    addMessageToTheView("YOU:   " + msg, null);
                 });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+     
+    public void initIntervalMessages(){
+        //loading(true);
+        /*DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+        LocalDateTime now = LocalDateTime.now();  
+        System.out.println("\nProcurando mensagens ....     "+dtf.format(now));*/
+        Thread t = new Thread(()->{
+            try {
+                boolean flag = true;
+                MessageEntry template = new MessageEntry();
+                template.from = userToLogin;
+                
+                while(flag){
+                    MessageEntry message = (MessageEntry) this.javaSpace.take(template, null, 1000);
+                    if(message == null){
+                        flag = false;
+                        
+                    }else{
+                        System.out.println("RECEBEU: " + message.content);
+                        Platform.runLater(()->{
+                            addMessageToTheView(message.from.toUpperCase() + ":   " + message.content, null);
+                        });
+                    }
+                }
+                Thread.sleep(1000);
+                initIntervalMessages();
+                //loading(false);
                 
             } catch (Exception e) {
                 e.printStackTrace();
