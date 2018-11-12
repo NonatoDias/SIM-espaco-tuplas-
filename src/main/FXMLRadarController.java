@@ -99,7 +99,7 @@ public class FXMLRadarController implements Initializable {
                         
                         Platform.runLater(()->{
                             double d = getDistance(userAux, user);
-                            if(d < maxDistance){
+                            if(d < (double)maxDistance){
                                 String text = userAux.id + " - " +userAux.login + " - "+d;
                                 System.out.println("RADAR: "+ text);
                                 jFXListUsers.getItems().add(new Label(text));
@@ -120,7 +120,6 @@ public class FXMLRadarController implements Initializable {
     public double getDistance(UserEntry u1, UserEntry u2){
         Float a = u2.lat - u1.lat;
         Float b = u2.lng - u1.lng;
-        return Math.sqrt(Math.abs(a*a - b*b));
+        return Math.sqrt(Math.abs((a*a) - (b*b)));
     }
-    
 }

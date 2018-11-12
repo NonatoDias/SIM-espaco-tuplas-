@@ -252,8 +252,8 @@ public class FXMLLoginDocumentController implements Initializable {
     }
 
     private void clearFields() {
-        textFieldLogin.setText("admin");
-        textFieldPass.setText("admin");
+        textFieldLogin.setText("");
+        textFieldPass.setText("");
         textFieldLat.setText("0.0");
         textFieldLng.setText("0.0");
     }
