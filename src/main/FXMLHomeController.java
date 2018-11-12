@@ -231,7 +231,7 @@ public class FXMLHomeController implements Initializable {
         }
     
         FXMLRoomController ctrl = loader.<FXMLRoomController>getController();
-        ctrl.setUserRoomConfigs(user.login, textFieldLat.getText(), textFieldLng.getText(), "1");
+        ctrl.setUserRoomConfigs(user.login, textFieldLat.getText(), textFieldLng.getText(), roomsList.get(index));
         
         Scene scene = new Scene(p);
         Stage stage = new Stage();

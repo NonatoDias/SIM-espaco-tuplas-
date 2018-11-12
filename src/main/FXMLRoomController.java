@@ -5,15 +5,20 @@
  */
 package main;
 
+import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -21,9 +26,11 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import main.tuplas.CounterEntry;
+import main.tuplas.MessageEntry;
 import main.tuplas.UserEntry;
 import main.tuplas.UserRoomEntry;
 import main.util.Lookup;
+import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
 
 /**
@@ -40,7 +47,14 @@ public class FXMLRoomController implements Initializable {
     private TextFlow msgTextFlow;
     
     @FXML
-    private TextFlow textFlowUsers;
+    private JFXListView<Label> jFXListUsers;
+    
+    @FXML public void handleMouseClick(MouseEvent arg0) {
+        int index = jFXListUsers.getSelectionModel().getSelectedIndex();
+        userToLogin = usersList.get(index);
+        labelTo.setText("Destinatário: "+ userToLogin);
+        this.msgTextFlow.getChildren().setAll(new Text(""));
+    }
 
     @FXML
     private JFXTextField jfxTfMessage;
@@ -48,9 +62,14 @@ public class FXMLRoomController implements Initializable {
     @FXML
     private Label labelRoom;
     
+    @FXML
+    private Label labelTo;
+    
     JavaSpace javaSpace;
     UserEntry user = new UserEntry();
     UserRoomEntry userRoom = new UserRoomEntry();
+    List<String> usersList = new ArrayList<String>();
+    String userToLogin = "";
     
     /**
      * Initializes the controller class.
@@ -64,7 +83,7 @@ public class FXMLRoomController implements Initializable {
             if(e.getCode().equals(KeyCode.ENTER)){
                 String colorPlayer = "#1e90ff";
                 try {
-                    addMessageToTheView(jfxTfMessage.getText(), null);
+                    addMessageEntry(jfxTfMessage.getText());
                     
                 } catch (Exception ex) {
                     
@@ -92,6 +111,7 @@ public class FXMLRoomController implements Initializable {
             //Get users
             try {
                 int count = 0;
+                usersList = new ArrayList<>();
                 CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 10 * 1000);
                 UserEntry template = new UserEntry();
                 while(count <= counter.lastIdUser){
@@ -101,10 +121,12 @@ public class FXMLRoomController implements Initializable {
                         System.out.println("Tempo de espera esgotado. Encerrando...");
                     }else {
                         Platform.runLater(()->{
-                            Text text = new Text(userAux.id + " - " +userAux.login+"\n");
+                            /*Text text = new Text(userAux.id + " - " +userAux.login+"\n");
                             text.setFill(Paint.valueOf("#2196f3"));
                             text.setFont(Font.font("Helvetica", FontPosture.REGULAR, 20));  
-                            textFlowUsers.getChildren().addAll(text);
+                            textFlowUsers.getChildren().addAll(text);*/
+                            usersList.add(userAux.login);
+                            jFXListUsers.getItems().add(new Label(userAux.id + " - " +userAux.login));
                         });
                         System.out.println(" - Lendo ... "+ userAux.id + " - "+ userAux.login + "     d= "+ getDistance(userAux, user));
                     }
@@ -140,6 +162,7 @@ public class FXMLRoomController implements Initializable {
     public void getUserInRadar(){
         loading(true);
         Thread t = new Thread(()->{
+            usersList = new ArrayList<>();
             try {
                 int count = 0;
                 CounterEntry counter = (CounterEntry) this.javaSpace.read(new CounterEntry(), null, 60 * 1000);
@@ -150,7 +173,7 @@ public class FXMLRoomController implements Initializable {
                     if (userAux == null) {
                         System.out.println("Tempo de espera esgotado. Encerrando...");
                     }else {
-                        
+                        usersList.add(userAux.login);
                         System.out.println(" - Lendo ... "+ userAux.id + " - "+ userAux.login + "     d= "+ getDistance(userAux, user));
                     }
                     count++;
@@ -175,11 +198,35 @@ public class FXMLRoomController implements Initializable {
     }
     
     public void addMessageToTheView(String msg, Paint value){
-        Text text = new Text(msg+"\n");
+        Text text = new Text("YOU:   " + msg+"\n");
         //text.setFill(value);
-        text.setFont(Font.font("Helvetica", FontPosture.REGULAR, 18));    
-        String message = msg+"&amp;"+value;
+        text.setFont(Font.font("Helvetica", FontPosture.REGULAR, 15));
         this.msgTextFlow.getChildren().addAll(text);
+    }
+    
+     public void addMessageEntry(String msg){
+        if(userToLogin.length() == 0) return;
+        
+        loading(true);
+        Thread t = new Thread(()->{
+            try {
+                MessageEntry message = new MessageEntry();
+                message.setAttributes(user.login, userToLogin, msg);
+                this.javaSpace.write(message, null, Lease.FOREVER);
+                    
+                String strMsg = "MENSAGEM de "+ message.from + " para "+ message.to + "\n    "+message.content;
+                System.out.println(strMsg);
+                loading(false);
+                Platform.runLater(()->{
+                    addMessageToTheView(msg, null);
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
     }
     
 }
